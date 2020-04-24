@@ -1,59 +1,66 @@
-pragma solidity >=0.4.21 <0.6.0;
+pragma solidity ^0.5.2;
 
-// TODO define a contract call to the zokrates generated solidity contract <Verifier> or <renamedVerifier>
-
-
-
-// TODO define another contract named SolnSquareVerifier that inherits from your ERC721Mintable class
+import "openzeppelin-solidity/contracts/utils/Address.sol";
+import "./Verifier.sol";
+import "./ERC721Mintable.sol";
 
 
-
-// TODO define a solutions struct that can hold an index & an address
-
-
-// TODO define an array of the above struct
+contract SquareVerifier is Verifier {}
 
 
-// TODO define a mapping to store unique solutions submitted
+contract SolnSquareVerifier is CustomERC721Token {
+    SquareVerifier public verifierContract;
 
+    constructor(address verifierAddress) public CustomERC721Token() {
+        verifierContract = SquareVerifier(verifierAddress);
+    }
 
+    event SolutionAdded(address submittedBy, bytes32 solutionHash);
 
-// TODO Create an event to emit when a solution is added
+    struct Solution {
+        bool exists;
+        bool used;
+        address submittedBy;
+    }
 
+    mapping(bytes32 => Solution) private solutions;
 
+    function addSolution(
+        uint256[2] memory a,
+        uint256[2][2] memory b,
+        uint256[2] memory c,
+        uint256[2] memory inputs
+    ) public returns (bool) {
+        bytes32 solutionHash = keccak256(abi.encodePacked(a, b, c, inputs));
 
-// TODO Create a function to add the solutions to the array and emit the event
+        require(
+            solutions[solutionHash].submittedBy == address(0),
+            "This solution already exists"
+        );
+        require(verifierContract.verifyTx(a, b, c, inputs), "Wrong solution");
 
+        solutions[solutionHash] = Solution({
+            exists: true,
+            used: false,
+            submittedBy: msg.sender
+        });
+        emit SolutionAdded(msg.sender, solutionHash);
+        return true;
+    }
 
-
-// TODO Create a function to mint new NFT only after the solution has been verified
-//  - make sure the solution is unique (has not been used before)
-//  - make sure you handle metadata as well as tokenSuplly
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    function mintToken(bytes32 solutionHash, address to, uint256 tokenId)
+        public
+        onlyOwner
+        returns (bool)
+    {
+        require(
+            solutions[solutionHash].exists,
+            "This solution does not exists"
+        );
+        require(!solutions[solutionHash].used, "This solution is already used");
+        solutions[solutionHash].used = true;
+        _mint(to, tokenId);
+        setTokenURI(tokenId);
+        return true;
+    }
+}
