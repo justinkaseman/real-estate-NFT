@@ -11,14 +11,14 @@ module.exports = {
       host: "127.0.0.1",
       port: 8545,
       network_id: "*", // Match any network id
-      provider: function () {
-        return new HDWalletProvider(
-          DEV_mnemonic,
-          "http://127.0.0.1:8545/",
-          0,
-          10
-        );
-      },
+      // provider: function () {
+      //   return new HDWalletProvider(
+      //     DEV_mnemonic,
+      //     "http://127.0.0.1:8545/",
+      //     0,
+      //     10
+      //   );
+      // },
     },
     rinkeby: {
       provider: () =>
@@ -35,7 +35,7 @@ module.exports = {
   },
   compilers: {
     solc: {
-      version: "^0.6.4",
+      version: "^0.5.2",
     },
   },
 };
