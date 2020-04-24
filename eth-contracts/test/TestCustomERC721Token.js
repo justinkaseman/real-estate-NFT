@@ -1,6 +1,6 @@
 var CustomERC721Token = artifacts.require("CustomERC721Token");
 
-contract("TestCustomERC721Token", (accounts) => {
+contract("CustomERC721Token", (accounts) => {
   const account_one = accounts[0];
   const account_two = accounts[1];
   const token_one = 2130332;
